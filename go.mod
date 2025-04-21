@@ -11,13 +11,13 @@ require (
 	github.com/o1egl/paseto v1.0.0
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
-	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.28.0
 )
 
 require (
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect
+	github.com/golang/mock v1.6.0 
 	github.com/pkg/errors v0.9.1 // indirect
 )
 

@@ -1,4 +1,4 @@
-package db
+package test
 
 import (
 	"database/sql"
@@ -6,15 +6,16 @@ import (
 	"os"
 	"testing"
 
+	"github.com/NhutHuyDev/sgbank/internal/infra/db"
 	"github.com/NhutHuyDev/sgbank/pkg/utils"
 	_ "github.com/lib/pq"
 )
 
-var testQueries *Queries
+var testQueries *db.Queries
 var testDB *sql.DB
 
 func TestMain(m *testing.M) {
-	config, err := utils.LoadConfig("../../../", "app")
+	config, err := utils.LoadConfig("../../../../", "app")
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 
@@ -26,7 +27,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot connect to db: ", err)
 	}
 
-	testQueries = New(testDB)
+	testQueries = db.New(testDB)
 
 	os.Exit(m.Run())
 }

@@ -1,4 +1,4 @@
-package db
+package test
 
 import (
 	"context"
@@ -6,11 +6,12 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/NhutHuyDev/sgbank/internal/infra/db"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTransferTx(t *testing.T) {
-	store := NewStore(testDB)
+	store := db.NewStore(testDB)
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
@@ -19,11 +20,11 @@ func TestTransferTx(t *testing.T) {
 	amount := int64(10)
 
 	errs := make(chan error)
-	results := make(chan TransferTxResult)
+	results := make(chan db.TransferTxResult)
 
 	for i := 0; i < n; i++ {
 		go func() {
-			result, err := store.TransferTx(context.Background(), TransferTxParams{
+			result, err := store.TransferTx(context.Background(), db.TransferTxParams{
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
 				Amount:        amount,
@@ -111,7 +112,7 @@ func TestTransferTx(t *testing.T) {
 
 // Testing Deadlock by order matters
 func TestTransferTxDeadlock(t *testing.T) {
-	store := NewStore(testDB)
+	store := db.NewStore(testDB)
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
@@ -131,7 +132,7 @@ func TestTransferTxDeadlock(t *testing.T) {
 		}
 
 		go func() {
-			_, err := store.TransferTx(context.Background(), TransferTxParams{
+			_, err := store.TransferTx(context.Background(), db.TransferTxParams{
 				FromAccountID: fromAccountID,
 				ToAccountID:   toAccountID,
 				Amount:        amount,
@@ -158,7 +159,7 @@ func TestTransferTxDeadlock(t *testing.T) {
 }
 
 func TestTransferTxCheckBalance(t *testing.T) {
-	store := NewStore(testDB)
+	store := db.NewStore(testDB)
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
@@ -172,14 +173,14 @@ func TestTransferTxCheckBalance(t *testing.T) {
 
 	// Use buffered channels to prevent blocking
 	errs := make(chan error, n)
-	results := make(chan TransferTxResult, n)
+	results := make(chan db.TransferTxResult, n)
 
 	for i := 0; i < n; i++ {
 		wg.Add(1) // Increment the counter
 
 		go func() {
 			defer wg.Done() // Decrement the counter when the goroutine completes
-			result, err := store.TransferTx(context.Background(), TransferTxParams{
+			result, err := store.TransferTx(context.Background(), db.TransferTxParams{
 				FromAccountID: account2.ID,
 				ToAccountID:   account1.ID,
 				Amount:        amount,

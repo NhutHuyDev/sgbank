@@ -1,20 +1,21 @@
-package db
+package test
 
 import (
 	"context"
 	"testing"
 	"time"
 
+	"github.com/NhutHuyDev/sgbank/internal/infra/db"
 	"github.com/NhutHuyDev/sgbank/pkg/secure"
 	"github.com/NhutHuyDev/sgbank/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomUser(t *testing.T) User {
+func createRandomUser(t *testing.T) db.User {
 	hashedPassword, err := secure.HashPassword(utils.RandomString(10))
 	require.NoError(t, err)
 
-	params := CreateUserParams{
+	params := db.CreateUserParams{
 		Username:       utils.RandomOwner(),
 		HashedPassword: hashedPassword,
 		FullName:       utils.RandomOwner(),

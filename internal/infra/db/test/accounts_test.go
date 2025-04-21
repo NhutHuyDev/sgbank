@@ -1,4 +1,4 @@
-package db
+package test
 
 import (
 	"context"
@@ -6,14 +6,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/NhutHuyDev/sgbank/internal/infra/db"
 	"github.com/NhutHuyDev/sgbank/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomAccount(t *testing.T) Account {
+func createRandomAccount(t *testing.T) db.Account {
 	user := createRandomUser(t)
 
-	params := CreateAccountParams{
+	params := db.CreateAccountParams{
 		Owner:    user.Username,
 		Balance:  int64(utils.RandomMoney()),
 		Currency: utils.RandomCurrency(),
@@ -71,7 +72,7 @@ func TestGetAccountForUpdate(t *testing.T) {
 func TestUpdateAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 
-	params := UpdatedAccountParams{
+	params := db.UpdatedAccountParams{
 		ID:      account1.ID,
 		Balance: int64(utils.RandomMoney()),
 	}
@@ -101,13 +102,13 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
-	var lastAccount Account
+	var lastAccount db.Account
 
 	for i := 0; i < 10; i++ {
 		lastAccount = createRandomAccount(t)
 	}
 
-	params := ListAccountsParams{
+	params := db.ListAccountsParams{
 		Owner:  lastAccount.Owner,
 		Limit:  int32(5),
 		Offset: 0,

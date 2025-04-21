@@ -1,4 +1,4 @@
-package rest
+package test
 
 import (
 	"bytes"
@@ -13,10 +13,11 @@ import (
 
 	"github.com/NhutHuyDev/sgbank/internal/infra/db"
 	mockdb "github.com/NhutHuyDev/sgbank/internal/infra/db/mock"
+	"github.com/NhutHuyDev/sgbank/internal/rest"
 	"github.com/NhutHuyDev/sgbank/internal/token"
 	"github.com/NhutHuyDev/sgbank/pkg/utils"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
 func TestGetAccountAPI(t *testing.T) {
@@ -34,7 +35,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "OK",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, rest.AuthorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -51,7 +52,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "UnauthorizedUser",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized_user", time.Minute)
+				addAuthorization(t, request, tokenMaker, rest.AuthorizationTypeBearer, "unauthorized_user", time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -81,7 +82,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "NotFound",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, rest.AuthorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -97,7 +98,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "InternalError",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, rest.AuthorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -113,7 +114,7 @@ func TestGetAccountAPI(t *testing.T) {
 			name:      "InvalidID",
 			accountID: 0,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, rest.AuthorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -143,9 +144,9 @@ func TestGetAccountAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
-			tc.setupAuth(t, request, server.tokenMaker)
+			tc.setupAuth(t, request, server.TokenMaker)
 
-			server.router.ServeHTTP(recoder, request)
+			server.Router.ServeHTTP(recoder, request)
 			tc.checkResponse(t, recoder)
 		})
 	}
@@ -165,7 +166,7 @@ func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Accoun
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotAccount getAccountRes
+	var gotAccount rest.GetAccountRes
 	err = json.Unmarshal(data, &gotAccount)
 
 	require.NoError(t, err)

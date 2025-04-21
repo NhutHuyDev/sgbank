@@ -1,4 +1,4 @@
-package rest
+package test
 
 import (
 	"bytes"
@@ -15,8 +15,8 @@ import (
 	"github.com/NhutHuyDev/sgbank/pkg/secure"
 	"github.com/NhutHuyDev/sgbank/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
 type eqCreateUserParamsMatcher struct {
@@ -104,7 +104,7 @@ func TestCreateUserAPI(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 
-			server.router.ServeHTTP(recoder, request)
+			server.Router.ServeHTTP(recoder, request)
 			tc.checkResponse(t, recoder)
 		})
 	}

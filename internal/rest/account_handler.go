@@ -11,18 +11,18 @@ import (
 	"github.com/lib/pq"
 )
 
-type createAccountDTO struct {
+type CreateAccountDTO struct {
 	Currency string `json:"currency" binding:"required,oneof=USD EUR CAD"`
 }
 
 func (server *Server) createAccountHandler(ctx *gin.Context) {
-	var req createAccountDTO
+	var req CreateAccountDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(AuthorizationPayloadKey).(*token.Payload)
 
 	arg := db.CreateAccountParams{
 		Owner:    authPayload.Username,
@@ -30,7 +30,7 @@ func (server *Server) createAccountHandler(ctx *gin.Context) {
 		Balance:  0,
 	}
 
-	account, err := server.store.CreateAccount(ctx, arg)
+	account, err := server.Store.CreateAccount(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
@@ -49,22 +49,22 @@ func (server *Server) createAccountHandler(ctx *gin.Context) {
 	})
 }
 
-type getAccountDTO struct {
+type GetAccountDTO struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
-type getAccountRes struct {
+type GetAccountRes struct {
 	Account db.Account `json:"account"`
 }
 
 func (server *Server) getAccountHandler(ctx *gin.Context) {
-	var req getAccountDTO
+	var req GetAccountDTO
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	account, err := server.store.GetAccount(ctx, req.ID)
+	account, err := server.Store.GetAccount(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -75,14 +75,14 @@ func (server *Server) getAccountHandler(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(AuthorizationPayloadKey).(*token.Payload)
 	if authPayload.Username != account.Owner {
 		err := errors.New("account doestn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, getAccountRes{
+	ctx.JSON(http.StatusOK, GetAccountRes{
 		Account: account,
 	})
 }
@@ -99,14 +99,14 @@ func (server *Server) listAccountsHandler(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(AuthorizationPayloadKey).(*token.Payload)
 	arg := db.ListAccountsParams{
 		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	accounts, err := server.store.ListAccounts(ctx, arg)
+	accounts, err := server.Store.ListAccounts(ctx, arg)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))

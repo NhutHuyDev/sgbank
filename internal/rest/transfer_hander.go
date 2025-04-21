@@ -29,7 +29,7 @@ func (server *Server) transferHandler(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	authPayload := ctx.MustGet(AuthorizationPayloadKey).(*token.Payload)
 	if authPayload.Username != fromAccount.Owner {
 		err := errors.New("from account doestn't belong to the authenticated user")
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
@@ -41,7 +41,7 @@ func (server *Server) transferHandler(ctx *gin.Context) {
 		return
 	}
 
-	toAccount, err := server.store.GetAccount(ctx, req.ToAccountID)
+	toAccount, err := server.Store.GetAccount(ctx, req.ToAccountID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -59,7 +59,7 @@ func (server *Server) transferHandler(ctx *gin.Context) {
 		Amount:        req.Amount,
 	}
 
-	result, err := server.store.TransferTx(ctx, arg)
+	result, err := server.Store.TransferTx(ctx, arg)
 	if err != nil {
 		fmt.Println(err)
 		if err.Error() == "the balance of the from account is insufficient" {
@@ -74,7 +74,7 @@ func (server *Server) transferHandler(ctx *gin.Context) {
 }
 
 func (server *Server) isValidAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {
-	account, err := server.store.GetAccount(ctx, accountID)
+	account, err := server.Store.GetAccount(ctx, accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
