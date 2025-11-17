@@ -29,7 +29,7 @@ func (store *StoreSQL) execTx(ctx context.Context, fn func(*Queries) error) erro
 		return err
 	}
 
-	q := New(tx)
+	q := store.WithTx(tx)
 	err = fn(q)
 
 	if err != nil {
