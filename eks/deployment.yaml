@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sgbank-deployment
+  labels:
+    app: sgbank
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: sgbank
+  template:
+    metadata:
+      labels:
+        app: sgbank
+    spec:
+      containers:
+        - name: sgbank
+          image: 381492143576.dkr.ecr.ap-southeast-2.amazonaws.com/sgbank:latest
+          imagePullPolicy: Always
+          ports: 
+            - containerPort: 8080

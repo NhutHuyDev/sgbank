@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sgbank-service
+spec:
+  selector:
+      app: sgbank
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  # type: LoadBalancer
+  type: ClusterIP
