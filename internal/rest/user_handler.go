@@ -8,6 +8,7 @@ import (
 	"github.com/NhutHuyDev/sgbank/internal/infra/db"
 	"github.com/NhutHuyDev/sgbank/pkg/secure"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -79,8 +80,12 @@ type SignInDTO struct {
 }
 
 type SignInRes struct {
-	AccessToken string  `json:"access_token"`
-	User        UserRes `json:"user"`
+	SessionID             uuid.UUID `json:"session_id"`
+	AccessToken           string    `json:"access_token"`
+	AccessTokenExpiresAt  time.Time `json:"access_token_expires_at"`
+	RefreshToken          string    `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
+	User                  UserRes   `json:"user"`
 }
 
 func (server *Server) signInHandler(ctx *gin.Context) {
@@ -107,13 +112,35 @@ func (server *Server) signInHandler(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.TokenMaker.CreateToken(user.Username, server.Config.AccessTokenDuration)
+	refreshToken, refreshPayload, err := server.TokenMaker.CreateToken(user.Username, server.Config.AccessTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
+	session, err := server.Store.CreateSession(ctx, db.CreateSessionParams{
+		ID:           refreshPayload.ID,
+		Username:     refreshPayload.Username,
+		RefreshToken: refreshToken,
+		UserAgent:    ctx.Request.UserAgent(),
+		ClientIp:     ctx.ClientIP(),
+		ExpiresAt:    refreshPayload.ExpiredAt,
+		CreatedAt:    refreshPayload.ExpiredAt,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
+	accessToken, accessPayload, err := server.TokenMaker.CreateToken(user.Username, server.Config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
 	ctx.JSON(http.StatusOK, SignInRes{
-		AccessToken: accessToken,
-		User:        castToUserRes(user),
+		SessionID:             session.ID,
+		AccessToken:           accessToken,
+		AccessTokenExpiresAt:  accessPayload.ExpiredAt,
+		RefreshToken:          refreshToken,
+		RefreshTokenExpiresAt: accessPayload.ExpiredAt,
+		User:                  castToUserRes(user),
 	})
 }

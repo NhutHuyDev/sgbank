@@ -22,6 +22,14 @@ content-type: application/json
     "password": "9999999"
 }
 
+### POST: /renew-access-token
+POST http://localhost:8080/v1/users/renew-token HTTP/1.1
+content-type: application/json
+
+{
+  "access_token": "v2.local.qomUI5PnsYoKgQB1cwH6khhmXWjTtplgkCYD70xmHnrw6wUuvFH1RcaCL87DOOJVTWb7Ds0aEmZDrwYz2pXlQX69hi4J0Dh9k7FrysLwzbs0QSN2ihpMwPLN6oPi4S2fPPfP1aAa511rbabnKCvZqNXCXTCr60V_WyKIiztXt6SvwX5e2zdBUa8wHvixI4fa2nC7zVyTnzLYbxMS5EGOisSHCsRzClp2ISNTbqUjpqsnOkjiiK7MdRACOARPh_iA8FbRbichnrKg7Q.bnVsbA"
+}
+
 ### POST: /accounts
 POST http://localhost:8080/v1/accounts HTTP/1.1
 content-type: application/json
