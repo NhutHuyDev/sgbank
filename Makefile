@@ -40,4 +40,10 @@ lanch:
 mock:
 	mockgen -package mockdb -destination internal/infra/db/mock/store.go github.com/NhutHuyDev/sgbank/internal/infra/db Store
 
+db_docs:
+	dbdocs build doc/db.dbml
+
+db_schema:
+	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
+
 .PHONY: posgres createdb dropdb migrateup migrateup1 migratedown migratedown1 sqlc test server
