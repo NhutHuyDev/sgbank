@@ -7,9 +7,14 @@ import (
 	"github.com/NhutHuyDev/sgbank/internal/infra/db"
 	"github.com/NhutHuyDev/sgbank/internal/token"
 	"github.com/NhutHuyDev/sgbank/pkg/utils"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+
+	_ "github.com/NhutHuyDev/sgbank/doc/swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -44,6 +49,13 @@ func NewServer(config utils.Config, store db.Store) (*Server, error) {
 			"status": "OKE",
 		})
 	})
+
+	router.GET("/swagger", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	router.POST("/v1/users", server.createUserHandler)
 	router.POST("/v1/users/sign-in", server.signInHandler)
 	router.POST("/v1/users/renew-token", server.renewTokenHandler)
@@ -67,7 +79,7 @@ func NewServer(config utils.Config, store db.Store) (*Server, error) {
 	return server, nil
 }
 
-func (server *Server) StartServer(address string) error {
+func (server *Server) Start(address string) error {
 	return server.Router.Run(address)
 }
 

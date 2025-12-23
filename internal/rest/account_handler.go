@@ -57,6 +57,19 @@ type GetAccountRes struct {
 	Account db.Account `json:"account"`
 }
 
+// GetAccount godoc
+// @Summary      Get account by ID
+// @Description  Get account detail by account ID. Only the account owner can access this resource.
+// @Tags         accounts
+// @Produce      json
+// @Param        id   path      int64  true  "Account ID (must be >= 1)"
+// @Success      200  {object}  GetAccountRes
+// @Failure      400  {object}  map[string]string "Invalid account ID"
+// @Failure      401  {object}  map[string]string "Unauthorized or account does not belong to user"
+// @Failure      404  {object}  map[string]string "Account not found"
+// @Failure      500  {object}  map[string]string "Internal server error"
+// @Security     BearerAuth
+// @Router       /accounts/{id} [get]
 func (server *Server) getAccountHandler(ctx *gin.Context) {
 	var req GetAccountDTO
 	if err := ctx.ShouldBindUri(&req); err != nil {
